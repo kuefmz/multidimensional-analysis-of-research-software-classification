@@ -1,12 +1,8 @@
 name: build-pwc-full-once
 
-# One-time full extraction from the frozen Papers with Code public archive.
-# After a successful artifact is captured this workflow should be removed or made manual-only.
+# Full extraction from the frozen Papers with Code public archive.
+# A complete artifact was captured on 2026-09-28; keep this manual-only for reproducibility.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - ".github/workflows/build-pwc-full-once.yml"
   workflow_dispatch:
 
 jobs:
