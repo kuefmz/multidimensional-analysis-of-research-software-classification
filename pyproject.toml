@@ -1,0 +1,11 @@
+[project]
+name = "multidimensional-analysis-of-research-software-classification"
+version = "0.1.0"
+description = "Reproducible data and analysis pipeline for semantic dimensions in research software classification."
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
