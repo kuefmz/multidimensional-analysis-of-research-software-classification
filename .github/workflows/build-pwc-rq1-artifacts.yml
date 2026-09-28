@@ -22,10 +22,21 @@ jobs:
       - name: Collect Papers with Code labels
         shell: bash
         run: |
+          set +e
           if [ -n "${{ inputs.limit }}" ]; then
             python src/paperswithcode_hf_collector.py --limit "${{ inputs.limit }}"
           else
             python src/paperswithcode_hf_collector.py
+          fi
+          code=$?
+          set -e
+          test -s data/raw/papers_with_code/provenance.json
+          test -s data/interim/paperswithcode_label_frequencies.csv
+          if [ "$code" -ne 0 ] && [ "$code" -ne 134 ]; then
+            exit "$code"
+          fi
+          if [ "$code" -eq 134 ]; then
+            echo "Collector output completed; ignoring known datasets/pyarrow interpreter-shutdown exit 134."
           fi
       - name: Show summary
         run: |
