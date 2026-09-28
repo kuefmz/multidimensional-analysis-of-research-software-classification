@@ -41,7 +41,8 @@ def quality_reasons(label: str) -> list[str]:
         reasons.append("contains_url")
     if EMAIL_RE.search(text):
         reasons.append("contains_email")
-    if PHONE_RE.search(text):
+    digit_count = sum(ch.isdigit() for ch in text)
+    if PHONE_RE.search(text) or (len(text) >= 15 and digit_count >= 8):
         reasons.append("phone_like")
 
     words = WORD_RE.findall(text)
