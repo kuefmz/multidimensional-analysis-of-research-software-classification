@@ -72,11 +72,14 @@ def collect(dump_path: Path, edam_path: Path) -> tuple[list[dict[str, object]], 
     biotools_subjects: dict[URIRef, str] = {}
     identifier_predicates = (SCHEMA_HTTP.identifier, SCHEMA_HTTPS.identifier)
     identifier_triples_seen = 0
+    identifier_value_examples: list[str] = []
     for predicate in identifier_predicates:
         for subject, _, identifier in graph.triples((None, predicate, None)):
             identifier_triples_seen += 1
-            value = str(identifier)
-            if value.startswith(BIOTOOLS_PREFIX):
+            value = str(identifier).strip()
+            if len(identifier_value_examples) < 20:
+                identifier_value_examples.append(value)
+            if value.startswith(BIOTOOLS_PREFIX) or value.lower().startswith("biotools:"):
                 biotools_subjects[subject] = value
 
     assignments: dict[tuple[str, str], set[str]] = defaultdict(set)
@@ -136,6 +139,7 @@ def collect(dump_path: Path, edam_path: Path) -> tuple[list[dict[str, object]], 
     stats = {
         "dump_triples": len(graph),
         "schema_identifier_triples_seen": identifier_triples_seen,
+        "identifier_value_examples": identifier_value_examples,
         "biotools_linked_software_subjects": len(biotools_subjects),
         "software_with_edam_topic": len(software_with_topic),
         "software_with_edam_operation": len(software_with_operation),
