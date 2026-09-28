@@ -14,13 +14,19 @@ sources:
   semrepo:
     name: SemRepo
     role: rq1_source
-    acquisition: rdf_or_sparql
-    url: https://semrepo.org/
+    acquisition: versioned_zenodo_ntriples_dump
+    url: https://doi.org/10.5281/zenodo.20084784
+    diagnostic_endpoint: https://semrepo.org/sparql
     classification_fields:
       - repository_topic
       - programming_language
+    excluded_initial_fields:
       - package
-    status: planned
+    status: collector_ready
+    notes: >
+      The public SPARQL endpoint exposed only 952 repository entities in the
+      2026-09-28 audit, far below the released ~197k-repository dataset.
+      Use the versioned Zenodo N-Triples dump as the primary RQ1 source.
 
   biotools:
     name: bio.tools
