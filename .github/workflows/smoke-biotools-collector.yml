@@ -1,0 +1,33 @@
+name: smoke-biotools-collector
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - "src/biotools_collector.py"
+      - ".github/workflows/smoke-biotools-collector.yml"
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch two bio.tools pages
+        run: python src/biotools_collector.py --max-pages 2
+      - name: Inspect provenance and first labels
+        run: |
+          cat data/raw/biotools/provenance.json
+          echo
+          head -n 21 data/interim/biotools_label_frequencies.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: biotools-smoke-artifacts
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            data/raw/biotools/provenance.json
+            data/interim/biotools_label_frequencies.csv
