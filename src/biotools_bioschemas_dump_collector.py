@@ -184,6 +184,7 @@ def main(
 ) -> None:
     rows, stats = collect(dump_path, edam_path)
     if stats["biotools_linked_software_subjects"] == 0:
+        print(json.dumps({"diagnostic_stats": stats}, indent=2))
         raise ValueError(
             "No bio.tools-linked software subjects found in the Bioschemas dump. "
             "Treat this as a schema/namespace mismatch rather than a valid empty result."
