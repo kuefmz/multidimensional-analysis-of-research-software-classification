@@ -1,11 +1,8 @@
 name: smoke-biotools-collector
 
+# bio.tools returned HTTP 521 to GitHub-hosted runners on 2026-09-28.
+# Keep this as an explicit/manual connectivity test rather than failing every dev push.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - "src/biotools_collector.py"
-      - ".github/workflows/smoke-biotools-collector.yml"
   workflow_dispatch:
 
 jobs:
