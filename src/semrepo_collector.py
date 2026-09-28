@@ -62,6 +62,41 @@ ORDER BY DESC(?frequency)
 """,
 }
 
+COUNT_QUERIES = {
+    "repository_total": """
+SELECT (COUNT(DISTINCT ?repository) AS ?count)
+WHERE {
+  GRAPH <https://semrepo.org> {
+    ?repository
+      <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+        <https://semrepo.org/class/repository> .
+  }
+}
+""",
+    "repositories_with_topic": """
+SELECT (COUNT(DISTINCT ?repository) AS ?count)
+WHERE {
+  GRAPH <https://semrepo.org> {
+    ?repository
+      <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+        <https://semrepo.org/class/repository> ;
+      <http://xmlns.com/foaf/0.1/topic> ?topic .
+  }
+}
+""",
+    "repositories_with_language": """
+SELECT (COUNT(DISTINCT ?repository) AS ?count)
+WHERE {
+  GRAPH <https://semrepo.org> {
+    ?repository
+      <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+        <https://semrepo.org/class/repository> ;
+      <https://semrepo.org/property/hasLanguageReference> ?languageRef .
+  }
+}
+""",
+}
+
 
 def sparql_json(query: str, endpoint: str = ENDPOINT, timeout: int = 120) -> dict:
     body = urlencode({"query": query}).encode("utf-8")
@@ -162,6 +197,14 @@ def main(endpoint: str = ENDPOINT) -> None:
         )
     )
 
+    endpoint_counts: dict[str, int] = {}
+    for count_name, count_query in COUNT_QUERIES.items():
+        payload = sparql_json(count_query, endpoint=endpoint)
+        bindings = payload.get("results", {}).get("bindings", [])
+        endpoint_counts[count_name] = (
+            int(bindings[0]["count"]["value"]) if bindings else 0
+        )
+
     write_csv(OUT_DIR / "semrepo_label_frequencies.csv", all_rows)
 
     provenance = {
@@ -178,6 +221,17 @@ def main(endpoint: str = ENDPOINT) -> None:
             )
         },
         "query_stats": query_stats,
+        "endpoint_counts": endpoint_counts,
+        "coverage": {
+            "topic_repository_fraction": (
+                endpoint_counts["repositories_with_topic"] / endpoint_counts["repository_total"]
+                if endpoint_counts["repository_total"] else None
+            ),
+            "language_repository_fraction": (
+                endpoint_counts["repositories_with_language"] / endpoint_counts["repository_total"]
+                if endpoint_counts["repository_total"] else None
+            ),
+        },
     }
     (RAW_META_DIR / "provenance.json").write_text(
         json.dumps(provenance, indent=2) + "\n",
