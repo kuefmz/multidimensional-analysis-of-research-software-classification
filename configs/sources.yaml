@@ -4,12 +4,19 @@ sources:
     role: development_seed
     acquisition: frozen_csv
     url: https://gist.githubusercontent.com/andrew/627fd9cfe97eaf7f779e3c755c4fffa8/raw/0290a0dcbf3d867c75051662808ef07e0470170e/joss_keywords.csv
-    expected_records: 3279
+    expected_records: 3278
+    snapshot_type: frozen
     classification_fields:
-      - keywords
+      - joss_tags
+      - repository_topics
+    excluded_fields:
+      - combined_keywords
+    status: collected
     notes: >
-      Initial development corpus supplied by Andrew. Preserve the downloaded file
-      unchanged and record a SHA256 checksum before deriving any labels.
+      Initial development corpus supplied by Andrew. The frozen CSV contains
+      3,278 data records (3,279 lines including the header). Preserve JOSS tags
+      and GitHub repository topics separately; combined_keywords is excluded to
+      avoid double counting.
 
   semrepo:
     name: SemRepo
@@ -32,20 +39,39 @@ sources:
     name: bio.tools
     role: rq1_source
     acquisition: api
+    snapshot_type: retrieval_date
+    url: https://bio.tools/api/t/?format=json
     classification_fields:
       - edam_topic
       - edam_operation
-    status: planned
+    excluded_initial_fields:
+      - edam_data
+      - edam_format
+      - tool_type
+      - programming_language
+      - operating_system
+    status: collector_ready
+    notes: >
+      The production API returned HTTP 521 to a GitHub-hosted runner during the
+      2026-09-28 smoke test. Run from a permitted local environment or retry the
+      manual workflow when service connectivity is restored.
 
   paperswithcode:
     name: Papers with Code / Linked Papers with Code
     role: rq1_source
-    acquisition: dataset_or_kg
+    acquisition: frozen_huggingface_archive
+    snapshot_type: frozen_2025-07-28
+    url: https://huggingface.co/datasets/pwc-archive/papers-with-abstracts
     classification_fields:
       - area
       - task
       - method
-    status: planned
+      - method_collection
+      - collection_parent
+    status: collector_ready
+    notes: >
+      Use streaming extraction from the final public Papers with Code archive.
+      This avoids dependence on uncommitted local files from the previous project.
 
   github:
     name: GitHub
