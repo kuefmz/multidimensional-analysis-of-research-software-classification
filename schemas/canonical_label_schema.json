@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Canonical research-software classification label",
+  "type": "object",
+  "required": [
+    "source",
+    "source_record_id",
+    "raw_label",
+    "raw_label_type",
+    "normalized_label"
+  ],
+  "properties": {
+    "source": {"type": "string"},
+    "source_record_id": {"type": ["string", "integer"]},
+    "software_id": {"type": ["string", "null"]},
+    "repository_url": {"type": ["string", "null"]},
+    "raw_label": {"type": "string"},
+    "raw_label_type": {"type": "string"},
+    "normalized_label": {"type": "string"},
+    "normalization_method": {"type": "string"},
+    "canonical_concept_id": {"type": ["string", "null"]},
+    "canonical_label": {"type": ["string", "null"]},
+    "external_concept_uri": {"type": ["string", "null"]},
+    "primary_facet": {"type": ["string", "null"]},
+    "facet_confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "annotation_method": {
+      "type": ["string", "null"],
+      "enum": ["manual", "adjudicated", "rule", "model", null]
+    },
+    "annotator": {"type": ["string", "null"]},
+    "annotation_note": {"type": ["string", "null"]}
+  }
+}
