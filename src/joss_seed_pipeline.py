@@ -33,7 +33,7 @@ JOSS_URL = (
     "627fd9cfe97eaf7f779e3c755c4fffa8/raw/"
     "0290a0dcbf3d867c75051662808ef07e0470170e/joss_keywords.csv"
 )
-EXPECTED_RECORDS = 3279
+EXPECTED_RECORDS = 3278
 SEED = 42
 PILOT_SIZE = 50
 
@@ -62,6 +62,7 @@ REPOSITORY_COLUMN_CANDIDATES = (
     "github",
     "github_url",
 )
+NAME_COLUMN_CANDIDATES = ("name", "software_name", "title")
 
 
 def download(url: str) -> bytes:
@@ -148,29 +149,42 @@ def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, object]]) 
         writer.writerows(rows)
 
 
-def sample_frequency_strata(
+def sample_frequency_buckets(
     rows: list[dict[str, object]],
     size: int,
     rng: random.Random,
 ) -> list[dict[str, object]]:
+    """Sample common and rare labels explicitly instead of over-sampling singletons."""
     if len(rows) <= size:
         return list(rows)
 
-    ranked = sorted(
-        rows,
-        key=lambda row: (-int(row["frequency"]), str(row["normalized_label"])),
-    )
-    strata_count = min(5, size)
-    selected: list[dict[str, object]] = []
+    buckets = {
+        "common": [row for row in rows if int(row["frequency"]) >= 10],
+        "medium": [row for row in rows if 3 <= int(row["frequency"]) <= 9],
+        "repeated": [row for row in rows if int(row["frequency"]) == 2],
+        "singleton": [row for row in rows if int(row["frequency"]) == 1],
+    }
 
-    base_take = size // strata_count
-    remainder = size % strata_count
-    for stratum in range(strata_count):
-        start = round(stratum * len(ranked) / strata_count)
-        end = round((stratum + 1) * len(ranked) / strata_count)
-        bucket = ranked[start:end]
-        take = base_take + (1 if stratum < remainder else 0)
-        selected.extend(rng.sample(bucket, min(take, len(bucket))))
+    # For a 25-label source sample this yields 7 / 7 / 5 / 6.
+    proportions = {
+        "common": 0.28,
+        "medium": 0.28,
+        "repeated": 0.20,
+        "singleton": 0.24,
+    }
+    quotas = {name: int(size * proportion) for name, proportion in proportions.items()}
+    while sum(quotas.values()) < size:
+        for name in ("common", "medium", "singleton", "repeated"):
+            if sum(quotas.values()) >= size:
+                break
+            quotas[name] += 1
+
+    selected: list[dict[str, object]] = []
+    for name in ("common", "medium", "repeated", "singleton"):
+        bucket = buckets[name]
+        take = min(quotas[name], len(bucket))
+        if take:
+            selected.extend(rng.sample(bucket, take))
 
     if len(selected) < size:
         chosen = {
@@ -179,13 +193,12 @@ def sample_frequency_strata(
         }
         remaining = [
             row
-            for row in ranked
+            for row in rows
             if (str(row["raw_label_type"]), str(row["normalized_label"])) not in chosen
         ]
         selected.extend(rng.sample(remaining, min(size - len(selected), len(remaining))))
 
     return selected[:size]
-
 
 def stratified_pilot(
     frequency_rows: list[dict[str, object]],
@@ -209,7 +222,7 @@ def stratified_pilot(
         for index, label_type in enumerate(types):
             target = base + (1 if index < remainder else 0)
             selected.extend(
-                sample_frequency_strata(by_type[label_type], target, rng)
+                sample_frequency_buckets(by_type[label_type], target, rng)
             )
 
     return sorted(
@@ -250,6 +263,7 @@ def main(force_download: bool = False) -> None:
                 f"Available columns: {reader.fieldnames}"
             )
         repository_column = choose_column(reader.fieldnames, REPOSITORY_COLUMN_CANDIDATES)
+        name_column = choose_column(reader.fieldnames, NAME_COLUMN_CANDIDATES)
         records = list(reader)
 
     provenance = {
@@ -272,6 +286,7 @@ def main(force_download: bool = False) -> None:
             else []
         ),
         "repository_column": repository_column,
+        "name_column": name_column,
         "raw_file": str(raw_path.relative_to(ROOT)),
     }
     provenance_path.write_text(json.dumps(provenance, indent=2) + "\n", encoding="utf-8")
@@ -279,9 +294,11 @@ def main(force_download: bool = False) -> None:
     extracted_rows: list[dict[str, object]] = []
     counts: Counter[tuple[str, str]] = Counter()
     example_raw: dict[tuple[str, str], str] = {}
+    example_context: dict[tuple[str, str], tuple[str, str]] = {}
 
     for index, row in enumerate(records, start=1):
         repository = row.get(repository_column, "") if repository_column else ""
+        software_name = row.get(name_column, "") if name_column else ""
         for column, label_type in label_columns:
             for raw_label in parse_keywords(row.get(column, "")):
                 normalized = normalize_surface(raw_label)
@@ -290,6 +307,7 @@ def main(force_download: bool = False) -> None:
                 key = (label_type, normalized)
                 counts[key] += 1
                 example_raw.setdefault(key, raw_label)
+                example_context.setdefault(key, (software_name, repository))
                 extracted_rows.append(
                     {
                         "source": "joss",
@@ -324,6 +342,8 @@ def main(force_download: bool = False) -> None:
             "normalized_label": normalized,
             "example_raw_label": example_raw[(label_type, normalized)],
             "frequency": frequency,
+            "example_software": example_context[(label_type, normalized)][0],
+            "example_repository_url": example_context[(label_type, normalized)][1],
         }
         for (label_type, normalized), frequency in counts.items()
     ]
@@ -337,7 +357,14 @@ def main(force_download: bool = False) -> None:
 
     write_csv(
         INTERIM_DIR / "joss_label_frequencies.csv",
-        ["raw_label_type", "normalized_label", "example_raw_label", "frequency"],
+        [
+            "raw_label_type",
+            "normalized_label",
+            "example_raw_label",
+            "frequency",
+            "example_software",
+            "example_repository_url",
+        ],
         frequencies,
     )
 
@@ -362,6 +389,8 @@ def main(force_download: bool = False) -> None:
             "normalized_label",
             "example_raw_label",
             "frequency",
+            "example_software",
+            "example_repository_url",
             "primary_facet",
             "proposed_facet",
             "confidence",
@@ -381,7 +410,7 @@ def main(force_download: bool = False) -> None:
     if len(records) != EXPECTED_RECORDS:
         print(
             "WARNING: source record count differs from the documented 3,279 rows. "
-            "Check provenance.json before using the snapshot."
+            "Check provenance.json before using the snapshot. Note that the documented 3,279 refers to CSV lines including the header; the frozen file contains 3,278 data records."
         )
 
 
