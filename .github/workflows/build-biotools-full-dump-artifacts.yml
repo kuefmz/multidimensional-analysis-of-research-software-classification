@@ -17,9 +17,11 @@ jobs:
       - name: Sparse clone static research-software dump
         shell: bash
         run: |
-          git clone --depth 1 --filter=blob:none --sparse \
+          git clone --depth 1 --filter=blob:none --no-checkout \
             https://github.com/research-software-ecosystem/content.git /tmp/rse-content
-          git -C /tmp/rse-content sparse-checkout set datasets/bioschemas-dump.ttl
+          git -C /tmp/rse-content sparse-checkout init --no-cone
+          git -C /tmp/rse-content sparse-checkout set --no-cone datasets/bioschemas-dump.ttl
+          git -C /tmp/rse-content checkout
       - name: Clone EDAM ontology
         run: git clone --depth 1 https://github.com/edamontology/edamontology.git /tmp/edam
       - uses: actions/setup-python@v5
