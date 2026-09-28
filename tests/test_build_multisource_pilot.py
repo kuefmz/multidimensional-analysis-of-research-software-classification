@@ -55,3 +55,25 @@ def test_output_annotation_columns_are_blank(tmp_path):
     assert row["primary_facet"] == ""
     assert row["proposed_facet"] == ""
     assert row["frequency_bucket"] == "common"
+
+
+def test_balances_native_label_types_within_source():
+    rows = []
+    for label_type, count in (("area", 7), ("method", 40), ("task", 100)):
+        rows.extend(
+            {
+                "source": "pwc",
+                "raw_label_type": label_type,
+                "normalized_label": f"{label_type}-{i}",
+                "frequency": str(20 if i < 10 else 1),
+            }
+            for i in range(count)
+        )
+    sampled = module.sample_source_by_label_type(rows, target=30, rng=module.random.Random(42))
+    counts = {
+        label_type: sum(row["raw_label_type"] == label_type for row in sampled)
+        for label_type in ("area", "method", "task")
+    }
+    assert counts["area"] == 7
+    assert counts["method"] + counts["task"] == 23
+    assert abs(counts["method"] - counts["task"]) <= 1
