@@ -1,0 +1,64 @@
+facets:
+  scientific_domain:
+    label: Scientific / Subject Domain
+    definition: The scientific or disciplinary field in which the software is situated.
+    examples: [astronomy, genomics, natural language processing]
+
+  application_area:
+    label: Application Area
+    definition: The concrete application context or problem area in which the software is used.
+    examples: [healthcare, climate modelling, drug discovery]
+
+  function:
+    label: Function / Task
+    definition: What the software does or the task it supports.
+    examples: [classification, visualization, simulation, sequence alignment]
+
+  method:
+    label: Method / Algorithm
+    definition: The computational or analytical approach implemented or used by the software.
+    examples: [transformer, random forest, finite element method]
+
+  data_modality:
+    label: Data / Input Modality
+    definition: The principal type or modality of data processed by the software.
+    examples: [image, text, audio, graph]
+
+  technology:
+    label: Technology / Framework
+    definition: A software framework, platform, runtime, or technical ecosystem used by the software.
+    examples: [PyTorch, TensorFlow, CUDA]
+
+  programming_language:
+    label: Programming Language
+    definition: A programming language in which the software is implemented or with which it is associated.
+    examples: [Python, R, C++]
+
+  programming_paradigm:
+    label: Programming Paradigm
+    definition: A programming paradigm or high-level implementation style.
+    examples: [functional programming, object-oriented programming]
+
+  design_pattern:
+    label: Design / Architectural Pattern
+    definition: A recurring software design or architectural pattern.
+    examples: [singleton, model-view-controller]
+
+  software_artifact_type:
+    label: Software / Artifact Type
+    definition: The kind of software artifact or product being described.
+    examples: [library, command-line tool, workflow, web application]
+
+special_labels:
+  other:
+    definition: A coherent semantic dimension not represented by the current seed facets.
+  unclear:
+    definition: The label cannot be assigned reliably from the available wording/context.
+
+annotation_policy:
+  seed_only: true
+  allow_new_facets: true
+  allow_unclear: true
+  note: >
+    These facets are hypotheses for the pilot, not the final taxonomy.
+    RQ1 must be allowed to add, merge, split, or remove facets based on annotation evidence.
