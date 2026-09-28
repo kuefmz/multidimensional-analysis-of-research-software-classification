@@ -1,0 +1,36 @@
+name: smoke-pwc-hf-collector
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - "src/paperswithcode_hf_collector.py"
+      - ".github/workflows/smoke-pwc-hf-collector.yml"
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install streaming dataset dependency
+        run: pip install "datasets>=4,<5"
+      - name: Stream first 5000 PwC papers
+        run: python src/paperswithcode_hf_collector.py --limit 5000
+      - name: Show summary
+        run: |
+          cat data/raw/papers_with_code/provenance.json
+          echo
+          head -n 30 data/interim/paperswithcode_label_frequencies.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paperswithcode-smoke-artifacts
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            data/raw/papers_with_code/provenance.json
+            data/interim/paperswithcode_label_frequencies.csv
