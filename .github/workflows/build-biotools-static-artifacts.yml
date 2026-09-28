@@ -14,8 +14,14 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      - name: Clone static research software content snapshot
-        run: git clone --depth 1 https://github.com/research-software-ecosystem/content.git /tmp/rse-content
+      - name: Sparse clone current native bio.tools records
+        shell: bash
+        run: |
+          git clone --depth 1 --filter=blob:none --no-checkout \
+            https://github.com/research-software-ecosystem/content.git /tmp/rse-content
+          git -C /tmp/rse-content sparse-checkout init --no-cone
+          printf '%s\n' 'data/*/*.biotools.json' > /tmp/rse-content/.git/info/sparse-checkout
+          git -C /tmp/rse-content checkout
       - name: Capture source revision
         run: git -C /tmp/rse-content rev-parse HEAD > /tmp/rse-content-revision.txt
       - uses: actions/setup-python@v5
