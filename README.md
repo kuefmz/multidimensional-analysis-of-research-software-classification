@@ -14,28 +14,47 @@ The current implementation on `dev` starts with the JOSS seed corpus before addi
 
 ## Current status
 
-Implemented:
+Implemented on `dev`:
 
 - source registry and explicit source roles;
 - provisional RQ1 facet codebook with `Other` and `Unclear`;
 - immutable raw-data/provenance policy;
-- frozen JOSS seed downloader;
-- conservative lexical normalization;
-- canonical extracted-label table;
-- label-frequency table;
-- deterministic frequency-stratified 50-label annotation pilot;
-- pilot annotation guidelines;
+- frozen JOSS seed pipeline with separate JOSS-tag and repository-topic provenance;
+- deterministic 50-label pilot balanced by source and frequency bucket;
+- tracked clean pilot plus a separate assistant exploratory coding pass;
+- annotation guidelines, agreement preparation, observed agreement and Cohen's kappa code;
+- SemRepo SPARQL diagnostic collector and full streaming Zenodo N-Triples collector;
+- bio.tools EDAM Topic/Operation collector (local/permitted execution; hosted runner currently receives HTTP 521);
+- Papers with Code adapter that reuses the frozen merged snapshot from the previous project;
 - canonical record JSON Schema;
-- unit tests and CI.
+- source audit, unit tests and CI.
 
-Planned next:
+### JOSS seed snapshot
 
-- run and inspect the JOSS pilot;
-- revise the facet codebook based on disagreements;
-- add SemRepo as source #2;
-- add bio.tools and Papers with Code/LPWC;
-- expand to OpenAlex, OpenAIRE, GitHub and ORKG;
-- keep Awesome Lists held out for RQ3 validation.
+The frozen Andrew CSV contains **3,278 data records** (3,279 CSV lines including the
+header). The current extraction contains:
+
+- **7,338** distinct normalized JOSS tags from **14,124** assignments;
+- **5,757** distinct normalized repository topics from **11,133** assignments.
+
+The 50-label pilot contains 25 JOSS tags and 25 repository topics and includes source
+context for ambiguous labels.
+
+### SemRepo source decision
+
+The 2026-09-28 endpoint audit exposed only **952** repository entities, so the live
+endpoint is not used as the primary study snapshot. The full versioned Zenodo N-Triples
+release is the primary SemRepo path; `src/semrepo_dump_collector.py` processes it as a
+stream and uses SQLite only for the language-reference join.
+
+### Pilot facet stress test
+
+The exploratory coding pass suggests that the seed facets may be missing recurring
+dimensions such as **Object / Phenomenon of Study**, **Organization / Institution**,
+**Data Format**, and **Publication / Curation Status**. These remain candidate facets
+until human pilot adjudication.
+
+See `docs/source_audit.md` for source-specific decisions and limitations.
 
 ## Run the JOSS seed pipeline
 
