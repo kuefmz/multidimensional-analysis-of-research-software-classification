@@ -1,0 +1,36 @@
+name: build-seed-artifacts
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - "src/joss_seed_pipeline.py"
+      - ".github/workflows/build-seed-artifacts.yml"
+      - "configs/sources.yaml"
+  workflow_dispatch:
+
+jobs:
+  build-joss-seed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build frozen JOSS seed artifacts
+        run: python src/joss_seed_pipeline.py
+      - name: Show seed summary
+        run: |
+          cat data/raw/joss/provenance.json
+          echo
+          echo "Pilot preview:"
+          head -n 11 data/annotations/joss_pilot_50.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: joss-seed-artifacts
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            data/raw/joss/provenance.json
+            data/interim/joss_label_frequencies.csv
+            data/annotations/joss_pilot_50.csv
