@@ -4,11 +4,12 @@
 Primary snapshot source:
     https://github.com/research-software-ecosystem/content
 
-The repository preserves original bio.tools JSON backups under:
-    data/*/*.biotools.biotools.json.backup
+The repository preserves current native bio.tools JSON records under:
+    data/*/*.biotools.json
 
 This path is preferred over the live bio.tools API for reproducibility and because
-hosted runners observed HTTP 521 from the production API on 2026-09-28.
+hosted runners observed HTTP 521 from the production API on 2026-09-28. Backup files
+are deliberately ignored so each current tool is counted once.
 
 Extracted native classification dimensions:
 - EDAM Topic
@@ -66,11 +67,11 @@ def iter_concepts(tool: dict) -> set[tuple[str, str, str]]:
 
 
 def collect(input_root: Path) -> tuple[list[dict[str, object]], dict[str, object]]:
-    paths = sorted(input_root.glob("data/*/*.biotools.biotools.json.backup"))
+    paths = sorted(input_root.glob("data/*/*.biotools.json"))
     if not paths:
         raise FileNotFoundError(
-            f"No bio.tools backup JSON files found below {input_root}/data. "
-            "Expected data/*/*.biotools.biotools.json.backup"
+            f"No current bio.tools JSON files found below {input_root}/data. "
+            "Expected data/*/*.biotools.json"
         )
 
     assignments: dict[tuple[str, str, str], set[str]] = defaultdict(set)
@@ -128,8 +129,8 @@ def collect(input_root: Path) -> tuple[list[dict[str, object]], dict[str, object
     )
 
     stats = {
-        "backup_files_found": len(paths),
-        "backup_files_parsed": parsed,
+        "current_json_files_found": len(paths),
+        "current_json_files_parsed": parsed,
         "invalid_json_files": invalid,
         "tools_with_edam_topic": tools_with_topic,
         "tools_with_edam_operation": tools_with_operation,
@@ -179,7 +180,7 @@ def main(input_root: Path, source_revision: str = "") -> None:
         "source_repository": "https://github.com/research-software-ecosystem/content",
         "source_revision": source_revision or None,
         "processed_at_utc": datetime.now(timezone.utc).isoformat(),
-        "source_mode": "static_git_original_biotools_json_backups",
+        "source_mode": "static_git_current_native_biotools_json",
         "classification_fields": ["edam_topic", "edam_operation"],
         "excluded_initial_fields": [
             "edam_data",
