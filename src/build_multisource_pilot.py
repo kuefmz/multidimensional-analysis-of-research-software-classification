@@ -195,6 +195,7 @@ def write_pilot(path: Path, rows: list[dict[str, str]]) -> None:
     url_fields = (
         "example_repository_url",
         "example_paper_url",
+        "example_url",
         "raw_label_uri",
     )
 
