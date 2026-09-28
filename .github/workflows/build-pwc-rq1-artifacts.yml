@@ -1,0 +1,42 @@
+name: build-pwc-rq1-artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Optional paper limit; leave empty for full frozen snapshot"
+        required: false
+        default: ""
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install streaming dataset dependency
+        run: pip install "datasets>=4,<5"
+      - name: Collect Papers with Code labels
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.limit }}" ]; then
+            python src/paperswithcode_hf_collector.py --limit "${{ inputs.limit }}"
+          else
+            python src/paperswithcode_hf_collector.py
+          fi
+      - name: Show summary
+        run: |
+          cat data/raw/papers_with_code/provenance.json
+          echo
+          head -n 30 data/interim/paperswithcode_label_frequencies.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paperswithcode-rq1-artifacts
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            data/raw/papers_with_code/provenance.json
+            data/interim/paperswithcode_label_frequencies.csv
