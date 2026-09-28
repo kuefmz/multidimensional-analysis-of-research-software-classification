@@ -86,3 +86,36 @@ publication metadata, documentation and labels are populated.
 The present RQ1 instead studies the **semantic meaning of classification labels** (e.g.,
 domain vs function vs method vs technology). The old coverage table is therefore useful
 background but is not evidence for the new semantic-dimension results.
+
+
+## 2026-09-28 full Papers with Code execution
+
+The complete frozen Hugging Face archive was streamed successfully:
+
+- 576,261 papers processed;
+- 469,717 papers with at least one extracted classification label;
+- 19,963 distinct typed label rows;
+- 4,795 tasks;
+- 14,827 methods;
+- 313 method collections;
+- 21 collection-parent labels;
+- 7 areas.
+
+A subsequent structural quality audit found substantial archive pollution in the PwC
+method vocabulary. The raw frequency table is preserved; flagged rows are excluded only
+from annotation-pilot sampling. See `docs/pwc_label_quality_audit.md`.
+
+## bio.tools static-source validation
+
+The `research-software-ecosystem/content` repository provides original
+`*.biotools.biotools.json.backup` files that preserve canonical EDAM terms and URIs.
+A complete pass over the available backups found 2,473 files, all parseable. This is a
+useful validation subset, but it is too small to stand in for the full bio.tools
+ecosystem.
+
+The repository also publishes a merged `datasets/bioschemas-dump.ttl`. The RQ1
+pipeline therefore has a second collector that filters the merged graph to software
+records linked to a bio.tools identifier and extracts only EDAM Topic and Operation.
+The first graph-level run exposed representation/namespace differences in the merged
+dump; zero-record output is explicitly treated as an error rather than accepted as a
+valid empty source.
