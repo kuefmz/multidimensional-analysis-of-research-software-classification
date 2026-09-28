@@ -46,3 +46,30 @@ ex:b a schema:SoftwareApplication ;
         ("edam_operation", "Example operation"),
     }
     assert all(r["frequency"] == 1 for r in rows)
+
+
+def test_collect_accepts_https_schema_namespace(tmp_path):
+    dump = tmp_path / "dump.ttl"
+    dump.write_text(
+        """@prefix schema: <https://schema.org/> .
+@prefix edam: <http://edamontology.org/> .
+@prefix bt: <https://bio.tools/> .
+@prefix ex: <https://example.org/> .
+ex:a a schema:SoftwareApplication ;
+  schema:identifier bt:alpha ;
+  schema:applicationSubCategory edam:topic_0001 ;
+  schema:featureList edam:operation_0003 .
+""",
+        encoding="utf-8",
+    )
+    edam = tmp_path / "edam.ttl"
+    edam.write_text(
+        """@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+<http://edamontology.org/topic_0001> rdfs:label "Example topic" .
+<http://edamontology.org/operation_0003> rdfs:label "Example operation" .
+""",
+        encoding="utf-8",
+    )
+    rows, stats = module.collect(dump, edam)
+    assert stats["biotools_linked_software_subjects"] == 1
+    assert len(rows) == 2
