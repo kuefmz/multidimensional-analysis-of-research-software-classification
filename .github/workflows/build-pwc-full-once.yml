@@ -1,0 +1,50 @@
+name: build-pwc-full-once
+
+# One-time full extraction from the frozen Papers with Code public archive.
+# After a successful artifact is captured this workflow should be removed or made manual-only.
+on:
+  push:
+    branches: [dev]
+    paths:
+      - ".github/workflows/build-pwc-full-once.yml"
+  workflow_dispatch:
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install streaming dataset dependency
+        run: pip install "datasets>=4,<5"
+      - name: Collect full frozen PwC snapshot
+        shell: bash
+        run: |
+          set +e
+          python src/paperswithcode_hf_collector.py
+          code=$?
+          set -e
+          test -s data/raw/papers_with_code/provenance.json
+          test -s data/interim/paperswithcode_label_frequencies.csv
+          if [ "$code" -ne 0 ] && [ "$code" -ne 134 ]; then
+            exit "$code"
+          fi
+          if [ "$code" -eq 134 ]; then
+            echo "Collector output completed; ignoring known datasets/pyarrow interpreter-shutdown exit 134."
+          fi
+      - name: Show full-snapshot summary
+        run: |
+          cat data/raw/papers_with_code/provenance.json
+          echo
+          head -n 40 data/interim/paperswithcode_label_frequencies.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paperswithcode-full-rq1-artifacts
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            data/raw/papers_with_code/provenance.json
+            data/interim/paperswithcode_label_frequencies.csv
