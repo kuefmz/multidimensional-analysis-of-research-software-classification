@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.DS_Store
+
+# Raw downloaded snapshots are reproducible from configs/sources.yaml
+data/raw/**/*.csv
+data/raw/**/*.json
+data/raw/**/*.jsonl
+
+# Generated intermediates and outputs
+data/interim/**/*.csv
+data/processed/**/*.csv
+outputs/**/*.csv
+outputs/**/*.png
+outputs/**/*.pdf
+
+# Keep directory placeholders/readmes
+!data/**/.gitkeep
+!data/**/README.md
