@@ -33,7 +33,8 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "data" / "interim"
 RAW_META_DIR = ROOT / "data" / "raw" / "biotools"
 
-SCHEMA = Namespace("http://schema.org/")
+SCHEMA_HTTP = Namespace("http://schema.org/")
+SCHEMA_HTTPS = Namespace("https://schema.org/")
 BIOTOOLS_PREFIX = "https://bio.tools/"
 EDAM_PREFIX = "http://edamontology.org/"
 
@@ -69,9 +70,14 @@ def collect(dump_path: Path, edam_path: Path) -> tuple[list[dict[str, object]], 
     edam_labels = build_edam_labels(edam_path)
 
     biotools_subjects: dict[URIRef, str] = {}
-    for subject, _, identifier in graph.triples((None, SCHEMA.identifier, None)):
-        if isinstance(identifier, URIRef) and str(identifier).startswith(BIOTOOLS_PREFIX):
-            biotools_subjects[subject] = str(identifier)
+    identifier_predicates = (SCHEMA_HTTP.identifier, SCHEMA_HTTPS.identifier)
+    identifier_triples_seen = 0
+    for predicate in identifier_predicates:
+        for subject, _, identifier in graph.triples((None, predicate, None)):
+            identifier_triples_seen += 1
+            value = str(identifier)
+            if value.startswith(BIOTOOLS_PREFIX):
+                biotools_subjects[subject] = value
 
     assignments: dict[tuple[str, str], set[str]] = defaultdict(set)
     example_subject: dict[tuple[str, str], str] = {}
@@ -79,19 +85,24 @@ def collect(dump_path: Path, edam_path: Path) -> tuple[list[dict[str, object]], 
     software_with_operation: set[str] = set()
 
     for subject, biotools_id in biotools_subjects.items():
-        for obj in graph.objects(subject, SCHEMA.applicationSubCategory):
-            uri = str(obj)
-            if uri.startswith(EDAM_PREFIX + "topic_"):
-                assignments[("edam_topic", uri)].add(biotools_id)
-                example_subject.setdefault(("edam_topic", uri), str(subject))
-                software_with_topic.add(biotools_id)
+        for predicate in (
+            SCHEMA_HTTP.applicationSubCategory,
+            SCHEMA_HTTPS.applicationSubCategory,
+        ):
+            for obj in graph.objects(subject, predicate):
+                uri = str(obj)
+                if uri.startswith(EDAM_PREFIX + "topic_"):
+                    assignments[("edam_topic", uri)].add(biotools_id)
+                    example_subject.setdefault(("edam_topic", uri), str(subject))
+                    software_with_topic.add(biotools_id)
 
-        for obj in graph.objects(subject, SCHEMA.featureList):
-            uri = str(obj)
-            if uri.startswith(EDAM_PREFIX + "operation_"):
-                assignments[("edam_operation", uri)].add(biotools_id)
-                example_subject.setdefault(("edam_operation", uri), str(subject))
-                software_with_operation.add(biotools_id)
+        for predicate in (SCHEMA_HTTP.featureList, SCHEMA_HTTPS.featureList):
+            for obj in graph.objects(subject, predicate):
+                uri = str(obj)
+                if uri.startswith(EDAM_PREFIX + "operation_"):
+                    assignments[("edam_operation", uri)].add(biotools_id)
+                    example_subject.setdefault(("edam_operation", uri), str(subject))
+                    software_with_operation.add(biotools_id)
 
     rows: list[dict[str, object]] = []
     unresolved_labels = 0
@@ -124,6 +135,7 @@ def collect(dump_path: Path, edam_path: Path) -> tuple[list[dict[str, object]], 
 
     stats = {
         "dump_triples": len(graph),
+        "schema_identifier_triples_seen": identifier_triples_seen,
         "biotools_linked_software_subjects": len(biotools_subjects),
         "software_with_edam_topic": len(software_with_topic),
         "software_with_edam_operation": len(software_with_operation),
@@ -167,6 +179,11 @@ def main(
     edam_revision: str = "",
 ) -> None:
     rows, stats = collect(dump_path, edam_path)
+    if stats["biotools_linked_software_subjects"] == 0:
+        raise ValueError(
+            "No bio.tools-linked software subjects found in the Bioschemas dump. "
+            "Treat this as a schema/namespace mismatch rather than a valid empty result."
+        )
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     RAW_META_DIR.mkdir(parents=True, exist_ok=True)
