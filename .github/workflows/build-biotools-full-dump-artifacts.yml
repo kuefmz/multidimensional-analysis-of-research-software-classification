@@ -14,8 +14,12 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      - name: Clone static research-software content
-        run: git clone --depth 1 https://github.com/research-software-ecosystem/content.git /tmp/rse-content
+      - name: Sparse clone static research-software dump
+        shell: bash
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse \
+            https://github.com/research-software-ecosystem/content.git /tmp/rse-content
+          git -C /tmp/rse-content sparse-checkout set datasets/bioschemas-dump.ttl
       - name: Clone EDAM ontology
         run: git clone --depth 1 https://github.com/edamontology/edamontology.git /tmp/edam
       - uses: actions/setup-python@v5
