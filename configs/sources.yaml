@@ -68,10 +68,15 @@ sources:
       - method
       - method_collection
       - collection_parent
-    status: collector_ready
+    status: collected
+    full_snapshot_records: 576261
+    records_with_extracted_labels: 469717
+    typed_label_rows: 19963
     notes: >
-      Use streaming extraction from the final public Papers with Code archive.
-      This avoids dependence on uncommitted local files from the previous project.
+      Full frozen archive extraction completed on 2026-09-28. A structural
+      quality audit flags 3,420 typed labels as poor annotation units, almost
+      entirely in the method vocabulary. Preserve all raw labels but exclude
+      explicitly flagged rows from pilot sampling.
 
   github:
     name: GitHub
