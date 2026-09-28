@@ -1,0 +1,44 @@
+name: build-biotools-full-dump-artifacts
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - "src/biotools_bioschemas_dump_collector.py"
+      - ".github/workflows/build-biotools-full-dump-artifacts.yml"
+  workflow_dispatch:
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone static research-software content
+        run: git clone --depth 1 https://github.com/research-software-ecosystem/content.git /tmp/rse-content
+      - name: Clone EDAM ontology
+        run: git clone --depth 1 https://github.com/edamontology/edamontology.git /tmp/edam
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install RDF parser
+        run: pip install "rdflib>=7,<8"
+      - name: Collect full bio.tools-linked EDAM labels
+        shell: bash
+        run: |
+          content_revision=$(git -C /tmp/rse-content rev-parse HEAD)
+          edam_revision=$(git -C /tmp/edam rev-parse HEAD)
+          python src/biotools_bioschemas_dump_collector.py             --dump /tmp/rse-content/datasets/bioschemas-dump.ttl             --edam /tmp/edam/EDAM_dev.owl             --content-revision "$content_revision"             --edam-revision "$edam_revision"
+      - name: Show summary
+        run: |
+          cat data/raw/biotools/bioschemas_dump_provenance.json
+          echo
+          head -n 30 data/interim/biotools_full_label_frequencies.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: biotools-full-dump-rq1-artifacts
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            data/raw/biotools/bioschemas_dump_provenance.json
+            data/interim/biotools_full_label_frequencies.csv
