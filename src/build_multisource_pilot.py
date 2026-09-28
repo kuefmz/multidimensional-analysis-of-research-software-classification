@@ -98,6 +98,52 @@ def sample_rows(
     return selected[:target]
 
 
+def sample_source_by_label_type(
+    rows: list[dict[str, str]],
+    target: int,
+    rng: random.Random,
+) -> list[dict[str, str]]:
+    """Balance native label types within one ecosystem, then frequency-stratify."""
+    by_type: dict[str, list[dict[str, str]]] = defaultdict(list)
+    for row in rows:
+        by_type[row["raw_label_type"]].append(row)
+
+    label_types = sorted(by_type)
+    if not label_types:
+        return []
+
+    base = target // len(label_types)
+    remainder = target % len(label_types)
+    allocations = {
+        label_type: min(
+            len(by_type[label_type]),
+            base + (1 if index < remainder else 0),
+        )
+        for index, label_type in enumerate(label_types)
+    }
+
+    # Redistribute quota from small native label types to types with remaining capacity.
+    unfilled = target - sum(allocations.values())
+    while unfilled > 0:
+        progressed = False
+        for label_type in label_types:
+            if allocations[label_type] < len(by_type[label_type]):
+                allocations[label_type] += 1
+                unfilled -= 1
+                progressed = True
+                if unfilled == 0:
+                    break
+        if not progressed:
+            break
+
+    selected: list[dict[str, str]] = []
+    for label_type in label_types:
+        selected.extend(
+            sample_rows(by_type[label_type], allocations[label_type], rng)
+        )
+    return selected
+
+
 def balanced_sample(
     source_rows: dict[str, list[dict[str, str]]],
     total_size: int,
@@ -114,7 +160,7 @@ def balanced_sample(
     selected: list[dict[str, str]] = []
     for index, source in enumerate(sources):
         target = base + (1 if index < remainder else 0)
-        sampled = sample_rows(source_rows[source], target, rng)
+        sampled = sample_source_by_label_type(source_rows[source], target, rng)
         for row in sampled:
             row = dict(row)
             row["_sample_source"] = source
