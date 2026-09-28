@@ -1,0 +1,85 @@
+sources:
+  joss:
+    name: Journal of Open Source Software
+    role: development_seed
+    acquisition: frozen_csv
+    url: https://gist.githubusercontent.com/andrew/627fd9cfe97eaf7f779e3c755c4fffa8/raw/0290a0dcbf3d867c75051662808ef07e0470170e/joss_keywords.csv
+    expected_records: 3279
+    classification_fields:
+      - keywords
+    notes: >
+      Initial development corpus supplied by Andrew. Preserve the downloaded file
+      unchanged and record a SHA256 checksum before deriving any labels.
+
+  semrepo:
+    name: SemRepo
+    role: rq1_source
+    acquisition: rdf_or_sparql
+    url: https://semrepo.org/
+    classification_fields:
+      - repository_topic
+      - programming_language
+      - package
+    status: planned
+
+  biotools:
+    name: bio.tools
+    role: rq1_source
+    acquisition: api
+    classification_fields:
+      - edam_topic
+      - edam_operation
+    status: planned
+
+  paperswithcode:
+    name: Papers with Code / Linked Papers with Code
+    role: rq1_source
+    acquisition: dataset_or_kg
+    classification_fields:
+      - area
+      - task
+      - method
+    status: planned
+
+  github:
+    name: GitHub
+    role: rq1_source
+    acquisition: api_or_existing_kg
+    classification_fields:
+      - topics
+      - languages
+    status: planned
+
+  openalex:
+    name: OpenAlex
+    role: rq1_context_source
+    acquisition: api
+    classification_fields:
+      - topics
+    status: planned
+
+  openaire:
+    name: OpenAIRE
+    role: rq1_source
+    acquisition: api_or_dump
+    classification_fields:
+      - subjects
+      - keywords
+    status: planned
+
+  orkg:
+    name: ORKG
+    role: rq1_source
+    acquisition: api
+    classification_fields:
+      - software_related_concepts
+    status: planned
+
+  awesome_lists:
+    name: Awesome Lists
+    role: rq3_held_out_validation
+    acquisition: github
+    classification_fields:
+      - list_heading
+      - category_heading
+    status: hold_out
