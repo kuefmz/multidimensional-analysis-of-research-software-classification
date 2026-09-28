@@ -64,13 +64,31 @@ def fallback_edam_label(uri: str) -> str:
     return local.replace("_", " ")
 
 
+def predicate_local_name(predicate: object) -> str:
+    value = str(predicate).rstrip("/")
+    if "#" in value:
+        return value.rsplit("#", 1)[-1]
+    return value.rsplit("/", 1)[-1]
+
+
+def predicates_named(graph: Graph, local_name: str) -> set[URIRef]:
+    return {
+        predicate
+        for predicate in graph.predicates()
+        if predicate_local_name(predicate) == local_name
+    }
+
+
 def collect(dump_path: Path, edam_path: Path) -> tuple[list[dict[str, object]], dict[str, object]]:
     graph = Graph()
     graph.parse(dump_path, format="turtle")
     edam_labels = build_edam_labels(edam_path)
 
     biotools_subjects: dict[URIRef, str] = {}
-    identifier_predicates = (SCHEMA_HTTP.identifier, SCHEMA_HTTPS.identifier)
+    identifier_predicates = predicates_named(graph, "identifier")
+    topic_predicates = predicates_named(graph, "applicationSubCategory")
+    operation_predicates = predicates_named(graph, "featureList")
+
     identifier_triples_seen = 0
     identifier_value_examples: list[str] = []
     for predicate in identifier_predicates:
@@ -88,10 +106,7 @@ def collect(dump_path: Path, edam_path: Path) -> tuple[list[dict[str, object]], 
     software_with_operation: set[str] = set()
 
     for subject, biotools_id in biotools_subjects.items():
-        for predicate in (
-            SCHEMA_HTTP.applicationSubCategory,
-            SCHEMA_HTTPS.applicationSubCategory,
-        ):
+        for predicate in topic_predicates:
             for obj in graph.objects(subject, predicate):
                 uri = str(obj)
                 if uri.startswith(EDAM_PREFIX + "topic_"):
@@ -99,7 +114,7 @@ def collect(dump_path: Path, edam_path: Path) -> tuple[list[dict[str, object]], 
                     example_subject.setdefault(("edam_topic", uri), str(subject))
                     software_with_topic.add(biotools_id)
 
-        for predicate in (SCHEMA_HTTP.featureList, SCHEMA_HTTPS.featureList):
+        for predicate in operation_predicates:
             for obj in graph.objects(subject, predicate):
                 uri = str(obj)
                 if uri.startswith(EDAM_PREFIX + "operation_"):
@@ -138,6 +153,9 @@ def collect(dump_path: Path, edam_path: Path) -> tuple[list[dict[str, object]], 
 
     stats = {
         "dump_triples": len(graph),
+        "identifier_predicates": sorted(str(x) for x in identifier_predicates),
+        "topic_predicates": sorted(str(x) for x in topic_predicates),
+        "operation_predicates": sorted(str(x) for x in operation_predicates),
         "schema_identifier_triples_seen": identifier_triples_seen,
         "identifier_value_examples": identifier_value_examples,
         "biotools_linked_software_subjects": len(biotools_subjects),
