@@ -51,12 +51,12 @@ def test_collect_deduplicates_per_tool(tmp_path):
             }
         ],
     }
-    (data_dir / "example.biotools.biotools.json.backup").write_text(
+    (data_dir / "example.biotools.json").write_text(
         json.dumps(tool), encoding="utf-8"
     )
 
     rows, stats = module.collect(tmp_path)
-    assert stats["backup_files_parsed"] == 1
+    assert stats["current_json_files_parsed"] == 1
     assert stats["tools_with_edam_topic"] == 1
     assert stats["tools_with_edam_operation"] == 1
     assert len(rows) == 2
