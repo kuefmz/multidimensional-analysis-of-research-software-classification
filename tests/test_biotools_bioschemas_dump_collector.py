@@ -99,3 +99,28 @@ ex:a a schema:SoftwareApplication ;
     rows, stats = module.collect(dump, edam)
     assert stats["biotools_linked_software_subjects"] == 1
     assert len(rows) == 2
+
+
+def test_collect_matches_schema_predicates_by_local_name(tmp_path):
+    dump = tmp_path / "dump.ttl"
+    dump.write_text(
+        """@prefix custom: <https://example.org/schema/> .
+@prefix edam: <http://edamontology.org/> .
+@prefix ex: <https://example.org/tool/> .
+ex:a custom:identifier "biotools:alpha" ;
+  custom:applicationSubCategory edam:topic_0001 ;
+  custom:featureList edam:operation_0003 .
+""",
+        encoding="utf-8",
+    )
+    edam = tmp_path / "edam.ttl"
+    edam.write_text(
+        """@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+<http://edamontology.org/topic_0001> rdfs:label "Example topic" .
+<http://edamontology.org/operation_0003> rdfs:label "Example operation" .
+""",
+        encoding="utf-8",
+    )
+    rows, stats = module.collect(dump, edam)
+    assert stats["biotools_linked_software_subjects"] == 1
+    assert len(rows) == 2
