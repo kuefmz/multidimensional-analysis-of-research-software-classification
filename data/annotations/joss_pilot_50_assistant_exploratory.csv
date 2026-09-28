@@ -1,0 +1,51 @@
+pilot_id,normalized_label,primary_facet,proposed_facet,confidence,annotation_note,annotation_method
+JOSS-001,visualization,Function / Task,,0.95,Describes what the software supports/produces.,assistant_exploratory
+JOSS-002,remote sensing,Method / Algorithm,,0.65,Can also denote a disciplinary field; coded as an observation/acquisition method for the pilot.,assistant_exploratory
+JOSS-003,materials science,Scientific / Subject Domain,,0.99,,assistant_exploratory
+JOSS-004,robotics,Scientific / Subject Domain,,0.90,Could alternatively be an application area.,assistant_exploratory
+JOSS-005,classification,Function / Task,,0.95,Task rather than a specific classification algorithm.,assistant_exploratory
+JOSS-006,biomechanics,Scientific / Subject Domain,,0.99,,assistant_exploratory
+JOSS-007,regression,Method / Algorithm,,0.85,Could be framed as a task in some ecosystems; pilot should test this distinction.,assistant_exploratory
+JOSS-008,database,Software / Artifact Type,,0.75,May denote the software/resource type rather than a scientific concept.,assistant_exploratory
+JOSS-009,evolution,Scientific / Subject Domain,,0.80,Interpreted as evolutionary biology from the example context.,assistant_exploratory
+JOSS-010,c/c++,Programming Language,,0.99,,assistant_exploratory
+JOSS-011,comets,Other,Object / Phenomenon of Study,0.95,Names the scientific object being studied rather than the discipline itself.,assistant_exploratory
+JOSS-012,medical physics,Scientific / Subject Domain,,0.99,,assistant_exploratory
+JOSS-013,pharmacology,Scientific / Subject Domain,,0.99,,assistant_exploratory
+JOSS-014,vlbi,Method / Algorithm,,0.90,Very-long-baseline interferometry is an observational technique.,assistant_exploratory
+JOSS-015,cern,Other,Organization / Institution,0.99,Organization name.,assistant_exploratory
+JOSS-016,enzyme,Other,Object / Phenomenon of Study,0.95,Biological entity rather than a field or computational method.,assistant_exploratory
+JOSS-017,fast fourier transforms,Method / Algorithm,,0.99,,assistant_exploratory
+JOSS-018,phase field,Method / Algorithm,,0.85,Interpreted as phase-field modelling/method.,assistant_exploratory
+JOSS-019,safety,Other,Quality / Non-functional Concern,0.70,Neither task nor domain is sufficiently precise; likely a cross-cutting concern.,assistant_exploratory
+JOSS-020,artificial bee colony,Method / Algorithm,,0.99,Optimization metaheuristic.,assistant_exploratory
+JOSS-021,equivariance,Other,Mathematical Property / Concept,0.75,A mathematical/model property rather than a concrete algorithm.,assistant_exploratory
+JOSS-022,nleis,Method / Algorithm,,0.90,Nonlinear electrochemical impedance spectroscopy/analysis technique.,assistant_exploratory
+JOSS-023,ring-current,Other,Object / Phenomenon of Study,0.85,Physical phenomenon.,assistant_exploratory
+JOSS-024,secure-hashing,Function / Task,,0.80,Describes a security function; could also be represented as a method family.,assistant_exploratory
+JOSS-025,tokamak,Other,Object / Phenomenon of Study,0.99,Physical research object/device.,assistant_exploratory
+JOSS-026,python,Programming Language,,0.99,,assistant_exploratory
+JOSS-027,peer-reviewed,Other,Publication / Curation Status,0.99,Describes status/quality assurance rather than software semantics.,assistant_exploratory
+JOSS-028,fortran,Programming Language,,0.99,,assistant_exploratory
+JOSS-029,molecular-dynamics,Method / Algorithm,,0.95,Simulation method.,assistant_exploratory
+JOSS-030,meteorology,Scientific / Subject Domain,,0.99,,assistant_exploratory
+JOSS-031,computer-vision,Scientific / Subject Domain,,0.90,Treated as a research/technical field; could be application area in another codebook.,assistant_exploratory
+JOSS-032,fem,Method / Algorithm,,0.95,Finite element method.,assistant_exploratory
+JOSS-033,molecular-dynamics-simulation,Method / Algorithm,,0.95,,assistant_exploratory
+JOSS-034,nasa,Other,Organization / Institution,0.99,Organization name.,assistant_exploratory
+JOSS-035,emissions,Other,Object / Phenomenon of Study,0.75,Names the quantity/phenomenon being processed rather than the computational task.,assistant_exploratory
+JOSS-036,stochastic,Unclear,,0.35,Modifier/property without enough semantics to identify one facet reliably.,assistant_exploratory
+JOSS-037,convex-optimization,Method / Algorithm,,0.95,,assistant_exploratory
+JOSS-038,covid19,Application Area,,0.90,Concrete disease/application context.,assistant_exploratory
+JOSS-039,microbiology,Scientific / Subject Domain,,0.99,,assistant_exploratory
+JOSS-040,conversion,Function / Task,,0.90,Describes the operation performed.,assistant_exploratory
+JOSS-041,correlations,Method / Algorithm,,0.80,Statistical analytical method/concept.,assistant_exploratory
+JOSS-042,cplusplus-20,Programming Language,,0.99,C++20 language/standard indicator.,assistant_exploratory
+JOSS-043,multi-fidelity,Method / Algorithm,,0.80,Modelling/optimization strategy.,assistant_exploratory
+JOSS-044,nii,Other,Data Format,0.95,NIfTI .nii file format indicator.,assistant_exploratory
+JOSS-045,bioconductor-packages,Technology / Framework,,0.85,Software ecosystem/framework indicator.,assistant_exploratory
+JOSS-046,distmesh,Method / Algorithm,,0.90,Mesh-generation algorithm/method.,assistant_exploratory
+JOSS-047,low-discrepancy-sequence,Method / Algorithm,,0.80,Sampling/numerical technique; could be mathematical object under a stricter scheme.,assistant_exploratory
+JOSS-048,packed-bed,Other,Object / Phenomenon of Study,0.90,Physical system being modelled.,assistant_exploratory
+JOSS-049,spherical-geometry,Scientific / Subject Domain,,0.80,Mathematical subject area.,assistant_exploratory
+JOSS-050,wolfram-language,Programming Language,,0.99,,assistant_exploratory
