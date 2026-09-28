@@ -228,6 +228,9 @@ def main(inputs: list[Path], output: Path, size: int, seed: int) -> None:
     for path in inputs:
         fallback = path.stem.replace("_label_frequencies", "")
         for row in read_frequency_csv(path):
+            eligibility = (row.get("pilot_eligible") or "true").strip().lower()
+            if eligibility == "false":
+                continue
             by_source[source_name(row, fallback)].append(row)
 
     sampled = balanced_sample(dict(by_source), total_size=size, seed=seed)
