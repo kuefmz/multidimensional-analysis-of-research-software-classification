@@ -1,0 +1,34 @@
+name: build-semrepo-artifacts
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - "src/semrepo_collector.py"
+      - ".github/workflows/build-semrepo-artifacts.yml"
+  workflow_dispatch:
+
+jobs:
+  collect-semrepo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Query SemRepo grouped labels
+        run: python src/semrepo_collector.py
+      - name: Show collection summary
+        run: |
+          cat data/raw/semrepo/provenance.json
+          echo
+          echo "Top rows:"
+          head -n 21 data/interim/semrepo_label_frequencies.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: semrepo-rq1-artifacts
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            data/raw/semrepo/provenance.json
+            data/interim/semrepo_label_frequencies.csv
