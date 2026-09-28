@@ -41,3 +41,10 @@ def test_audit_preserves_rows_and_adds_flags():
     assert len(out) == 2
     assert out[0]["pilot_eligible"] == "true"
     assert out[1]["pilot_eligible"] == "false"
+
+
+def test_flags_unicode_separated_phone_number():
+    reasons = module.quality_reasons(
+        "wallet customer care number (📞 1•(888)•829•0881)"
+    )
+    assert "phone_like" in reasons
